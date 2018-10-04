@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body,html{
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        body{
+            background-color: #000;
+        }
+
+        ul{
+            padding: 0;
+            list-style-type: none;
+        }
+        
+        #app{
+            width: 1200px;
+            margin: 0 auto;           
+            height: 100%;
+            display: flex;
+            
+
+        }
+        .left{
+            width: 450px;
+            background-color:#b4020a;
+            padding: 10px 20px;
+            /* box-sizing: border-box; */
+            overflow-y: scroll;
+            
+        }
+        .left input{
+            height: 30px;
+            width: 390px;
+            display: block;
+            outline: none;
+            font-size: 24px;
+            font-weight: 600;
+            color:blueviolet;
+            padding-left: 10px;
+            /* margin: 50px auto; */
+            border-radius: 10px;
+            
+        }
+        /* .left ul{
+            margin-top: 10px;
+        } */
+        .left .musicName{
+            /* width: 300px; */
+            /* height: 30px; */
+            line-height: 30px;
+            border: 2px solid skyblue;
+            display: block;
+            font-size: 18px;
+            color: #000;       
+            cursor: pointer;
+            margin-top: 5px;
+            border-radius: 10px;
+           
+        }
+        .righet{
+            flex:1; 
+            box-sizing: border-box;
+            background-color:skyblue;
+            overflow-y: scroll;
+            
+        }
+        .righet img{
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            display: block;
+            margin: 20px auto;
+        }
+        .righet audio{
+            display: block;
+            margin: 40px auto;
+        }
+        
+        .righet ul{
+            padding: 10px;
+        }
+        .righet li{
+            display: flex;
+            margin-top: 3px;
+            border: 2px solid #000;
+            border-radius:6px;
+            
+        }
+        .righet li .comment-right{
+            flex: 1;
+        }
+
+        .righet li .two-img{
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0;
+            margin-left: 40px;
+            padding-right: 20px;
+          
+        }
+        .righet .comment-right .title{
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            padding: 10px 0;
+            color: black;
+        }
+        .righet .comment-right .content{
+            margin: 0;
+            font-size: 14px;
+            color: black;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        /* 制定一个图片旋转的动画 */
+        @keyframes playimg{
+            from{
+                transform: rotateZ(0deg);
+            }
+            50%{
+                transform: rotateZ(180deg)
+            }
+            to{
+            transform: rotateZ(360deg);
+            }
+
+        }
+        /* 制定一个旋转图片的类 */
+        .rotate{
+            animation: playimg 50s infinite linear;
+        }
+        /* 暂停 */
+        .pause{
+            animation-play-state: paused;
+        }
+        /* 列表过度 */
+        .list-item {
+        display: inline-block;
+        margin-right: 10px;
+        }
+        .list-enter-active, .list-leave-active {
+        transition: all 1s;
+        }
+        .list-enter, .list-leave-to
+        /* .list-leave-active for below version 2.1.8 */ {
+        opacity: 0;
+        transform: translateX(300px);
+        }
+        
+        /* 列表过度 */
+        .comment-item {
+        display: inline-block;
+        margin-right: 10px;
+        }
+        .comment-enter-active, .comment-leave-active {
+        transition: all 1s;
+        }
+        .comment-enter, .comment-leave-to
+        /* .list-leave-active for below version 2.1.8 */ {
+        opacity: 0;
+        transform: translateX(300px);
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 左边搜索框部分 -->
+        <div class="left">
+
+            <input type="text" placeholder="请输入你要搜索的歌曲" @keyup.enter="search" v-model="music">
+            <transition-group name="list" tag="ul">
+                <li class="musicName" :style="{ transitionDelay:index*100+'ms' }" @dblclick="playMusic(item.id)" v-for="(item, index) in musicList" :key="item.id">
+                    {{item.name}}--{{item.artists[0].name}}
+                </li>
+            </transition-group>
+
+        </div>
+
+        <!-- 右边播放部分 -->
+        <div class="righet">
+            <img class="cover" :src="picUrl =='' ? 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=229648642,3046571664&fm=27&gp=0.jpg' : picUrl"
+                alt="">
+            <audio controls :src="musicUrl" autoplay></audio>
+
+            <transition-group name="comment" tag="ul">
+                
+                    <li :style="{ transitionDelay:index*100+'ms' }" v-for="(item, index) in commentsList" :key="item.commentId">
+                        <img class="two-img" :src="item.user.avatarUrl" alt="">
+                        <div class="comment-right">
+                            <p class="title">{{item.user.nickname}}</p>
+                            <p class="content">{{item.content}}</p>
+                        </div>
+                    </li>
+                
+            </transition-group>
+        </div>
+    </div>
+
+
+
+
+    <!-- 引入Vue -->
+    <script src="./lib/vue.js"></script>
+    <!-- 引入axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+        // 实例化一个Vue对象
+        let app = new Vue({
+            el: "#app",
+            data: {
+                // 歌曲名称
+                music: '',
+                musicList: [],
+                musicUrl: '',
+                picUrl: '',
+                // 评论数组
+                commentsList: []
+
+            },
+
+            // 事件
+            methods: {
+                // 按回车搜索歌曲
+                search() {
+                    // console.log('11');
+                    axios.get('https://autumnfish.cn/search?keywords=' + this.music)
+                        .then(response => {
+                            // handle success
+                            // console.log(response);
+                            this.musicList = response.data.result.songs
+                        })
+
+                },
+                // 双击歌曲自动播放
+                playMusic(id) {
+                    // console.log(id);
+
+                    axios.get('https://autumnfish.cn/music/url?id=' + id)
+                        .then(response => {
+                            // console.log(response);
+                            this.musicUrl = response.data.data[0].url;
+
+                        }),
+                        // 获取歌曲封面
+                        axios.get('https://autumnfish.cn/song/detail?ids=' + id).then(response => {
+                            // console.log(response);
+                            this.picUrl = response.data.songs[0].al.picUrl
+
+                        }),
+
+                        axios.get('https://autumnfish.cn/comment/music?limit=1&id=' + id).then(response => {
+                            // console.log(response);
+                            this.commentsList = response.data.hotComments;
+
+                        })
+
+                }
+
+            }
+
+
+        })
+
+        // 给封面图片添加旋转动画
+        document.querySelector('audio').onplay = function () {
+            // console.log('播放了');
+            document.querySelector('.cover').classList.remove('pause');
+            document.querySelector('.cover').classList.add('rotate');
+
+        }
+
+        document.querySelector('audio').onpause = function () {
+            //  console.log('暂停了');
+            document.querySelector('.cover').classList.add('pause');
+
+        }
+    </script>
+</body>
+
+</html>
